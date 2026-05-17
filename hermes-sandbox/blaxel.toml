@@ -1,0 +1,9 @@
+type = "sandbox"
+name = "hermes-agent"
+
+[sandbox]
+memory = 4096
+region = "us-pdx-1"
+
+[sandbox.ports]
+8443 = "HTTP"
