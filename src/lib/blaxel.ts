@@ -54,7 +54,7 @@ export async function configureSandbox(
 
   const hermesConfig = `
 model:
-  default: "${envVars.HERMES_LLM_MODEL || "anthropic/claude-sonnet-4.6"}"
+  default: "${envVars.HERMES_MODEL || "anthropic/claude-sonnet-4.6"}"
   provider: "openrouter"
 
 platforms:
