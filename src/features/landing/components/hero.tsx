@@ -174,15 +174,6 @@ export function Hero() {
       <div className="mx-auto mt-12 max-w-3xl rounded-2xl border border-white/[0.1] bg-[#1e1e1e] p-2.5 text-left">
         <div className="rounded-xl border border-white/[0.07] bg-[#0a0a0a] p-8">
           <p className="text-sm font-medium text-white">
-            Which model do you want as default?
-          </p>
-          <div className="mt-3 flex flex-wrap gap-3">
-            <PillSelector label="Claude Opus 4.5" icon={<ClaudeIcon />} selected />
-            <PillSelector label="GPT-5.2" icon={<OpenAIIcon />} disabled />
-            <PillSelector label="Gemini 3 Flash" icon={<GeminiIcon />} disabled />
-          </div>
-
-          <p className="mt-8 text-sm font-medium text-white">
             Which channel do you want to use for sending messages?
           </p>
           <div className="mt-3 flex flex-wrap gap-3">

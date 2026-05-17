@@ -40,6 +40,12 @@ export function QuickActions() {
           <span className="text-sm text-red-400">Restart failed</span>
         )}
       </div>
+      <p className="mt-4 text-xs text-gray-500">
+        For feedback or support contact{" "}
+        <a href="mailto:abhishek@thinkingsoundlab.com" className="text-gray-400 hover:text-white">
+          abhishek@thinkingsoundlab.com
+        </a>
+      </p>
     </div>
   );
 }

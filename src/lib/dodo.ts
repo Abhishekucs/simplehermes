@@ -12,12 +12,22 @@ function getClient() {
   return _client;
 }
 
-export async function createCheckoutSession(userId: string, email: string) {
+const PRODUCT_IDS: Record<string, string | undefined> = {
+  pro: process.env.DODO_PRODUCT_ID_PRO,
+  ultra: process.env.DODO_PRODUCT_ID_ULTRA,
+};
+
+export async function createCheckoutSession(userId: string, email: string, planId: string) {
+  const productId = PRODUCT_IDS[planId];
+  if (!productId) {
+    throw new Error(`Invalid plan: ${planId}`);
+  }
+
   const dodo = getClient();
   const session = await dodo.checkoutSessions.create({
-    product_cart: [{ product_id: process.env.DODO_PRODUCT_ID!, quantity: 1 }],
+    product_cart: [{ product_id: productId, quantity: 1 }],
     customer: { email },
-    metadata: { user_id: userId },
+    metadata: { user_id: userId, plan_id: planId },
     return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
   });
   return session;
