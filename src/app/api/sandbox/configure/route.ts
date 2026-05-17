@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
     const envVars = {
       OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY!,
-      HERMES_MODEL: process.env.HERMES_LLM_MODEL || "anthropic/claude-sonnet-4.6",
+      HERMES_INFERENCE_MODEL: process.env.HERMES_LLM_MODEL || "anthropic/claude-sonnet-4.6",
       HERMES_INFERENCE_PROVIDER: "openrouter",
       TELEGRAM_ALLOWED_USERS: telegramUserId,
       TELEGRAM_HOME_CHANNEL: telegramUserId,

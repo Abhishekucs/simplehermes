@@ -54,7 +54,7 @@ export async function configureSandbox(
 
   const hermesConfig = `
 model:
-  default: "${envVars.HERMES_MODEL || "anthropic/claude-sonnet-4.6"}"
+  default: "${envVars.HERMES_INFERENCE_MODEL || "anthropic/claude-sonnet-4.6"}"
   provider: "openrouter"
 
 platforms:
@@ -72,7 +72,7 @@ platforms:
         - usage
 `;
 
-  await sandbox.fs.write("/opt/data/cli-config.yaml", hermesConfig.trim());
+  await sandbox.fs.write("/opt/data/config.yaml", hermesConfig.trim());
 }
 
 async function readEnvFromSandbox(sandbox: SandboxInstance): Promise<Record<string, string>> {
