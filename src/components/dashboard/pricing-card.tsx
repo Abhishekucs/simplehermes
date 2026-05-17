@@ -1,7 +1,34 @@
 "use client";
 
+import { useState } from "react";
 import { PLAN } from "@/lib/constants";
 import type { Subscription } from "@/types/database";
+
+function ManageSubscriptionButton() {
+  const [loading, setLoading] = useState(false);
+
+  const handleManage = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/billing/portal", { method: "POST" });
+      if (!res.ok) return;
+      const { url } = await res.json();
+      if (url) window.location.href = url;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleManage}
+      disabled={loading}
+      className="w-full rounded-lg border border-gray-700 px-4 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {loading ? "Loading…" : "Manage Subscription"}
+    </button>
+  );
+}
 
 interface PricingCardProps {
   subscription: Subscription | null;
@@ -47,7 +74,7 @@ export function PricingCard({ subscription }: PricingCardProps) {
       </ul>
 
       {isActive ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <p className="text-sm text-green-400 font-medium">Active subscription</p>
           {subscription.current_period_end && (
             <p className="text-xs text-gray-500">
@@ -55,6 +82,7 @@ export function PricingCard({ subscription }: PricingCardProps) {
               {new Date(subscription.current_period_end).toLocaleDateString()}
             </p>
           )}
+          <ManageSubscriptionButton />
         </div>
       ) : (
         <button

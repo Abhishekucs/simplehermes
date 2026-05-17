@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import DodoPayments from "dodopayments";
+
+function getDodoClient() {
+  return new DodoPayments({
+    bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
+    environment: "test_mode",
+  });
+}
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -24,24 +32,35 @@ export async function POST(request: Request) {
     .from("subscriptions")
     .select("id")
     .eq("user_id", user.id)
-    .eq("status", "active")
+    .eq("dodo_subscription_id", subscription_id)
     .single();
 
   if (existing) {
     return NextResponse.json({ success: true });
   }
 
-  await admin.from("subscriptions").upsert(
-    {
-      user_id: user.id,
-      dodo_subscription_id: subscription_id,
-      dodo_customer_id: user.email ?? "",
-      status: "active",
-      product_id: process.env.DODO_PRODUCT_ID!,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "dodo_subscription_id" }
-  );
+  try {
+    const dodo = getDodoClient();
+    const sub = await dodo.subscriptions.retrieve(subscription_id);
 
-  return NextResponse.json({ success: true });
+    await admin.from("subscriptions").upsert(
+      {
+        user_id: user.id,
+        dodo_subscription_id: sub.subscription_id,
+        dodo_customer_id: sub.customer.customer_id,
+        status: sub.status,
+        product_id: sub.product_id,
+        current_period_start: sub.previous_billing_date,
+        current_period_end: sub.next_billing_date,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "dodo_subscription_id" }
+    );
+
+    return NextResponse.json({ success: true, status: sub.status });
+  } catch (e) {
+    console.error("[checkout/confirm] error:", e);
+    const message = e instanceof Error ? e.message : "Failed to confirm subscription";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
