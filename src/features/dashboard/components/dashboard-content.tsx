@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useSandboxStore } from "@/stores/sandbox-store";
 import { StatusCard } from "./status-card";
 import { BotLink } from "./bot-link";
@@ -24,6 +25,24 @@ export function DashboardContent({
 }: DashboardContentProps) {
   const { startPolling, stopPolling } = useSandboxStore();
   const [wizardOpen, setWizardOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    const subscriptionId = searchParams.get("subscription_id");
+
+    if (payment === "success" && subscriptionId && subscription?.status !== "active") {
+      fetch("/api/checkout/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription_id: subscriptionId }),
+      }).then(() => {
+        router.replace("/dashboard");
+        router.refresh();
+      });
+    }
+  }, [searchParams, subscription, router]);
 
   useEffect(() => {
     if (sandbox) {
