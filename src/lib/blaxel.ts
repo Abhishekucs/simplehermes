@@ -10,10 +10,8 @@ export async function provisionSandbox(userId: string) {
     ports: [{ target: 8443, protocol: "HTTP" }],
     region: process.env.BL_REGION || "us-pdx-1",
     envs: [
-      { name: "AWS_ACCESS_KEY_ID", value: process.env.AWS_ACCESS_KEY_ID! },
-      { name: "AWS_SECRET_ACCESS_KEY", value: process.env.AWS_SECRET_ACCESS_KEY! },
-      ...(process.env.AWS_SESSION_TOKEN ? [{ name: "AWS_SESSION_TOKEN", value: process.env.AWS_SESSION_TOKEN }] : []),
-      { name: "AWS_REGION_NAME", value: process.env.AWS_REGION_NAME || "us-east-1" },
+      { name: "OPENROUTER_API_KEY", value: process.env.OPENROUTER_API_KEY! },
+      { name: "HERMES_INFERENCE_PROVIDER", value: "openrouter" },
       { name: "HERMES_HOME", value: "/opt/data" },
     ],
     labels: { userId, app: "simplehermes" },
@@ -53,6 +51,28 @@ export async function configureSandbox(
     .join("\n");
 
   await sandbox.fs.write("/opt/data/.env", envContent);
+
+  const hermesConfig = `
+model:
+  default: "${envVars.HERMES_LLM_MODEL || "anthropic/claude-sonnet-4.6"}"
+  provider: "openrouter"
+
+platforms:
+  telegram:
+    extra:
+      allow_admin_from: "0"
+      user_allowed_commands:
+        - help
+        - new
+        - reset
+        - status
+        - retry
+        - undo
+        - compress
+        - usage
+`;
+
+  await sandbox.fs.write("/opt/data/cli-config.yaml", hermesConfig.trim());
 }
 
 async function readEnvFromSandbox(sandbox: SandboxInstance): Promise<Record<string, string>> {
