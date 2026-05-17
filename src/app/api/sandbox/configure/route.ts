@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { configureSandbox, startHermes, getPublicWebhookUrl } from "@/lib/blaxel";
+import { getModelForProduct } from "@/lib/plans";
 import { encrypt } from "@/lib/encryption";
 import { randomBytes } from "crypto";
 
@@ -37,6 +38,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No sandbox found" }, { status: 404 });
   }
 
+  const { data: subscription } = await admin
+    .from("subscriptions")
+    .select("product_id")
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .single();
+
+  const model = getModelForProduct(subscription?.product_id ?? null);
+
   try {
     const webhookSecret = randomBytes(32).toString("hex");
     const publicUrl = await getPublicWebhookUrl(sandbox.blaxel_sandbox_name);
@@ -46,7 +56,7 @@ export async function POST(request: Request) {
       AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID!,
       AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY!,
       AWS_REGION: process.env.AWS_REGION || "us-east-1",
-      HERMES_INFERENCE_MODEL: process.env.HERMES_LLM_MODEL || "global.anthropic.claude-sonnet-4-6",
+      HERMES_INFERENCE_MODEL: model,
       HERMES_INFERENCE_PROVIDER: "bedrock",
       TELEGRAM_ALLOWED_USERS: telegramUserId,
       TELEGRAM_HOME_CHANNEL: telegramUserId,

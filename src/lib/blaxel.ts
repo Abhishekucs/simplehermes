@@ -109,6 +109,38 @@ export async function getSandboxStatus(sandboxName: string) {
   }
 }
 
+export async function updateSandboxModel(sandboxName: string, model: string) {
+  const sandbox = await SandboxInstance.get(sandboxName);
+  const env = await readEnvFromSandbox(sandbox);
+  env.HERMES_INFERENCE_MODEL = model;
+
+  const envContent = Object.entries(env)
+    .map(([k, v]) => `${k}=${v}`)
+    .join("\n");
+  await sandbox.fs.write("/opt/data/.env", envContent);
+
+  const hermesConfig = `
+model:
+  default: "${model}"
+  provider: "bedrock"
+
+platforms:
+  telegram:
+    extra:
+      allow_admin_from: "0"
+      user_allowed_commands:
+        - help
+        - new
+        - reset
+        - status
+        - retry
+        - undo
+        - compress
+        - usage
+`;
+  await sandbox.fs.write("/opt/data/config.yaml", hermesConfig.trim());
+}
+
 export async function restartHermes(sandboxName: string, env?: Record<string, string>) {
   const sandbox = await SandboxInstance.get(sandboxName);
   const processEnv = env ?? await readEnvFromSandbox(sandbox);
