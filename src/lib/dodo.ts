@@ -2,11 +2,12 @@ import DodoPayments from "dodopayments";
 
 let _client: DodoPayments | null = null;
 
-function getClient() {
+export function getClient() {
   if (!_client) {
     _client = new DodoPayments({
       bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
-      environment: "test_mode",
+      environment:
+        process.env.NODE_ENV === "production" ? "live_mode" : "test_mode",
     });
   }
   return _client;

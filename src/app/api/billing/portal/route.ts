@@ -1,13 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import DodoPayments from "dodopayments";
-
-function getDodoClient() {
-  return new DodoPayments({
-    bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
-    environment: "test_mode",
-  });
-}
+import { getClient } from "@/lib/dodo";
 
 export async function POST() {
   const supabase = await createClient();
@@ -32,7 +25,7 @@ export async function POST() {
   }
 
   try {
-    const dodo = getDodoClient();
+    const dodo = getClient();
     const session = await dodo.customers.customerPortal.create(
       subscription.dodo_customer_id,
       { return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing` }
