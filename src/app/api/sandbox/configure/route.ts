@@ -43,9 +43,11 @@ export async function POST(request: Request) {
     const webhookUrl = `${publicUrl}/telegram`;
 
     const envVars = {
-      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY!,
-      HERMES_INFERENCE_MODEL: process.env.HERMES_LLM_MODEL || "anthropic/claude-sonnet-4.6",
-      HERMES_INFERENCE_PROVIDER: "openrouter",
+      AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID!,
+      AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY!,
+      AWS_REGION: process.env.AWS_REGION || "us-east-1",
+      HERMES_INFERENCE_MODEL: process.env.HERMES_LLM_MODEL || "global.anthropic.claude-sonnet-4-6",
+      HERMES_INFERENCE_PROVIDER: "bedrock",
       TELEGRAM_ALLOWED_USERS: telegramUserId,
       TELEGRAM_HOME_CHANNEL: telegramUserId,
       TELEGRAM_BOT_TOKEN: botToken,

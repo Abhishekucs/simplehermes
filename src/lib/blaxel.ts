@@ -10,8 +10,10 @@ export async function provisionSandbox(userId: string) {
     ports: [{ target: 8443, protocol: "HTTP" }],
     region: process.env.BL_REGION || "us-pdx-1",
     envs: [
-      { name: "OPENROUTER_API_KEY", value: process.env.OPENROUTER_API_KEY! },
-      { name: "HERMES_INFERENCE_PROVIDER", value: "openrouter" },
+      { name: "AWS_ACCESS_KEY_ID", value: process.env.AWS_ACCESS_KEY_ID! },
+      { name: "AWS_SECRET_ACCESS_KEY", value: process.env.AWS_SECRET_ACCESS_KEY! },
+      { name: "AWS_REGION", value: process.env.AWS_REGION || "us-east-1" },
+      { name: "HERMES_INFERENCE_PROVIDER", value: "bedrock" },
       { name: "HERMES_HOME", value: "/opt/data" },
     ],
     labels: { userId, app: "simplehermes" },
@@ -54,8 +56,8 @@ export async function configureSandbox(
 
   const hermesConfig = `
 model:
-  default: "${envVars.HERMES_INFERENCE_MODEL || "anthropic/claude-sonnet-4.6"}"
-  provider: "openrouter"
+  default: "${envVars.HERMES_INFERENCE_MODEL || "global.anthropic.claude-sonnet-4-6"}"
+  provider: "bedrock"
 
 platforms:
   telegram:
