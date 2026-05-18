@@ -61,7 +61,7 @@ export function DashboardContent({
 
   if (subscription?.status !== "active") {
     return (
-      <div className="mx-auto max-w-md py-12">
+      <div className="mx-auto max-w-3xl py-12">
         <h2 className="mb-6 text-center text-xl font-semibold text-white">
           Subscribe to get started
         </h2>
