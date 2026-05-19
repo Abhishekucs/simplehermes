@@ -51,59 +51,75 @@ export function PricingCard({ subscription }: PricingCardProps) {
 
   if (isActive) {
     return (
-      <div className="rounded-xl border border-gray-800 bg-[#111111] p-6">
-        <div className="space-y-3">
-          <p className="text-sm text-green-400 font-medium">Active subscription</p>
-          {subscription.current_period_end && (
-            <p className="text-xs text-gray-500">
-              Renews{" "}
-              {new Date(subscription.current_period_end).toLocaleDateString()}
-            </p>
-          )}
-          <ManageSubscriptionButton />
+      <>
+        <div className="rounded-xl border border-gray-800 bg-[#111111] p-6">
+          <div className="space-y-3">
+            <p className="text-sm text-green-400 font-medium">Active subscription</p>
+            {subscription.current_period_end && (
+              <p className="text-xs text-gray-500">
+                Renews{" "}
+                {new Date(subscription.current_period_end).toLocaleDateString()}
+              </p>
+            )}
+            <ManageSubscriptionButton />
+          </div>
         </div>
-      </div>
+        <p className="mt-4 text-center text-sm text-gray-500">
+          For any feedback and support please contact{" "}
+          <a href="mailto:abhishek@thinkingsoundlab.com" className="text-gray-400 underline hover:text-white">
+            abhishek@thinkingsoundlab.com
+          </a>
+        </p>
+      </>
     );
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      {PLANS.map((plan) => (
-        <div key={plan.id} className="rounded-xl border border-gray-800 bg-[#111111] p-6">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-white">{plan.name}</h2>
-            <p className="mt-1 text-3xl font-bold text-white">{plan.price}</p>
+    <>
+      <div className="grid gap-6 md:grid-cols-2">
+        {PLANS.map((plan) => (
+          <div key={plan.id} className="rounded-xl border border-gray-800 bg-[#111111] p-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-white">{plan.name}</h2>
+              <p className="mt-1 text-3xl font-bold text-white">{plan.price}</p>
+            </div>
+
+            <ul className="mb-6 space-y-2">
+              {plan.features.map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-gray-400">
+                  <svg
+                    className="h-4 w-4 text-green-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <button
+              onClick={() => handleSubscribe(plan.id)}
+              className="w-full cursor-pointer rounded-lg bg-[#D77655] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#c4654a]"
+            >
+              Subscribe — {plan.price}
+            </button>
           </div>
-
-          <ul className="mb-6 space-y-2">
-            {plan.features.map((feature) => (
-              <li key={feature} className="flex items-center gap-2 text-sm text-gray-400">
-                <svg
-                  className="h-4 w-4 text-green-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                {feature}
-              </li>
-            ))}
-          </ul>
-
-          <button
-            onClick={() => handleSubscribe(plan.id)}
-            className="w-full rounded-lg bg-[#D77655] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#c4654a]"
-          >
-            Subscribe — {plan.price}
-          </button>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+      <p className="mt-4 text-center text-sm text-gray-500">
+        For any feedback and support please contact{" "}
+        <a href="mailto:abhishek@thinkingsoundlab.com" className="text-gray-400 underline hover:text-white">
+          abhishek@thinkingsoundlab.com
+        </a>
+      </p>
+    </>
   );
 }
