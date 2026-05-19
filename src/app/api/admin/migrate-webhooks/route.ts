@@ -101,10 +101,7 @@ export async function POST(request: Request) {
         continue;
       }
 
-      // Restart Hermes so it picks up the new secret
-      await restartHermes(sandbox.blaxel_sandbox_name);
-
-      // Store the sandbox target URL and webhook secret in DB
+      // Store the webhook secret in DB before restart (restart can timeout)
       await admin
         .from("telegram_configs")
         .update({
@@ -112,6 +109,9 @@ export async function POST(request: Request) {
           updated_at: new Date().toISOString(),
         })
         .eq("id", config.id);
+
+      // Restart Hermes so it picks up the new secret
+      await restartHermes(sandbox.blaxel_sandbox_name);
 
       results.push({ user_id: config.user_id, success: true });
     } catch (err) {
