@@ -21,3 +21,15 @@ export function getPlanIdForProduct(productId: string | null): string {
   }
   return "pro";
 }
+
+const DAILY_LIMIT_BY_PRODUCT: Record<string, number> = {
+  [process.env.DODO_PRODUCT_ID_PRO!]: 10,
+  [process.env.DODO_PRODUCT_ID_ULTRA!]: 12,
+};
+
+export function getDailyLimitForProduct(productId: string | null): number {
+  if (productId && DAILY_LIMIT_BY_PRODUCT[productId]) {
+    return DAILY_LIMIT_BY_PRODUCT[productId];
+  }
+  return 10;
+}

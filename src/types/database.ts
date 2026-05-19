@@ -57,6 +57,16 @@ export interface TelegramConfig {
   bot_username: string | null;
   is_connected: boolean;
   webhook_url: string | null;
+  webhook_secret: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface MessageUsage {
+  id: string;
+  sandbox_id: string;
+  user_id: string;
+  telegram_update_id: number;
+  message_date: string;
+  created_at: string;
 }
