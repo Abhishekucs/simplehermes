@@ -139,7 +139,7 @@ export async function POST(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Telegram-Bot-Api-Secret-Token": secretHeader,
+      "X-Telegram-Bot-Api-Secret-Token": telegramConfig.webhook_secret ?? "",
     },
     body,
   }).catch(() => {});
