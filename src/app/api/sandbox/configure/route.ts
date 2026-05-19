@@ -50,7 +50,8 @@ export async function POST(request: Request) {
   try {
     const webhookSecret = randomBytes(32).toString("hex");
     const publicUrl = await getPublicWebhookUrl(sandbox.blaxel_sandbox_name);
-    const webhookUrl = `${publicUrl}/telegram`;
+    const sandboxTargetUrl = `${publicUrl}/telegram`;
+    const proxyWebhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/telegram/webhook/${sandbox.id}`;
 
     const envVars = {
       AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID!,
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
       TELEGRAM_ALLOWED_USERS: telegramUserId,
       TELEGRAM_HOME_CHANNEL: telegramUserId,
       TELEGRAM_BOT_TOKEN: botToken,
-      TELEGRAM_WEBHOOK_URL: webhookUrl,
+      TELEGRAM_WEBHOOK_URL: proxyWebhookUrl,
       TELEGRAM_WEBHOOK_PORT: "8443",
       TELEGRAM_WEBHOOK_SECRET: webhookSecret,
       HERMES_HOME: "/opt/data",
@@ -79,7 +80,8 @@ export async function POST(request: Request) {
         bot_token_encrypted: encryptedToken,
         bot_username: botUsername,
         is_connected: true,
-        webhook_url: webhookUrl,
+        webhook_url: sandboxTargetUrl,
+        webhook_secret: webhookSecret,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" }
@@ -98,7 +100,7 @@ export async function POST(request: Request) {
       .update({ status: "running", updated_at: new Date().toISOString() })
       .eq("id", sandbox.id);
 
-    return NextResponse.json({ success: true, webhookUrl });
+    return NextResponse.json({ success: true, webhookUrl: proxyWebhookUrl });
   } catch (error) {
     console.error("[sandbox/configure]", error);
     return NextResponse.json(
