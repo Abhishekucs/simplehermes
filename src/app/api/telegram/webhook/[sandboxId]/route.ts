@@ -10,7 +10,6 @@ export async function POST(
 ) {
   const { sandboxId } = await params;
   const body = await request.text();
-  const secretHeader = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
 
   const admin = createAdminClient();
 
@@ -27,16 +26,12 @@ export async function POST(
 
   const { data: telegramConfig } = await admin
     .from("telegram_configs")
-    .select("bot_token_encrypted, webhook_url, webhook_secret")
+    .select("bot_token_encrypted, webhook_url")
     .eq("sandbox_id", sandbox.id)
     .single();
 
   if (!telegramConfig) {
     return NextResponse.json({ error: "Not configured" }, { status: 404 });
-  }
-
-  if (!secretHeader || secretHeader !== telegramConfig.webhook_secret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   let update: Record<string, unknown>;
@@ -137,10 +132,7 @@ export async function POST(
 
   fetch(telegramConfig.webhook_url!, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Telegram-Bot-Api-Secret-Token": telegramConfig.webhook_secret ?? "",
-    },
+    headers: { "Content-Type": "application/json" },
     body,
   }).catch(() => {});
 
