@@ -135,20 +135,16 @@ export async function POST(
     });
   }
 
-  const forwardResponse = await fetch(telegramConfig.webhook_url!, {
+  fetch(telegramConfig.webhook_url!, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-Telegram-Bot-Api-Secret-Token": secretHeader,
     },
     body,
-  });
+  }).catch(() => {});
 
-  const responseBody = await forwardResponse.text();
-  return new Response(responseBody, {
-    status: forwardResponse.status,
-    headers: { "Content-Type": "application/json" },
-  });
+  return NextResponse.json({ ok: true });
 }
 
 async function sendTelegramMessage(
