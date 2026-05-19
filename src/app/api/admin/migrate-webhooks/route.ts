@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { decrypt } from "@/lib/encryption";
+import { restartHermes } from "@/lib/blaxel";
 import { randomBytes } from "crypto";
 import { SandboxInstance } from "@blaxel/core";
 
@@ -12,11 +13,19 @@ export async function POST(request: Request) {
 
   const admin = createAdminClient();
 
-  const { data: configs, error } = await admin
+  const url = new URL(request.url);
+  const force = url.searchParams.get("force") === "true";
+
+  let query = admin
     .from("telegram_configs")
     .select("id, user_id, sandbox_id, bot_token_encrypted, webhook_url, webhook_secret")
-    .is("webhook_secret", null)
     .eq("is_connected", true);
+
+  if (!force) {
+    query = query.is("webhook_secret", null);
+  }
+
+  const { data: configs, error } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -91,6 +100,9 @@ export async function POST(request: Request) {
         });
         continue;
       }
+
+      // Restart Hermes so it picks up the new secret
+      await restartHermes(sandbox.blaxel_sandbox_name);
 
       // Store the sandbox target URL and webhook secret in DB
       await admin
