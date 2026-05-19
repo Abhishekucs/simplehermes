@@ -26,7 +26,7 @@ export async function POST(
 
   const { data: telegramConfig } = await admin
     .from("telegram_configs")
-    .select("bot_token_encrypted, webhook_url")
+    .select("bot_token_encrypted, webhook_url, webhook_secret")
     .eq("sandbox_id", sandbox.id)
     .single();
 
@@ -132,7 +132,10 @@ export async function POST(
 
   fetch(telegramConfig.webhook_url!, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "X-Telegram-Bot-Api-Secret-Token": telegramConfig.webhook_secret ?? "",
+    },
     body,
   }).catch(() => {});
 
