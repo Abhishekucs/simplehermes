@@ -149,13 +149,14 @@ export async function restartHermes(sandboxName: string, env?: Record<string, st
   } catch {
     // Process may not exist
   }
-  await sandbox.process.exec({
+  sandbox.process.exec({
     name: "hermes-main",
     command: "bash -c 'set -a; . /opt/data/.env; set +a; source /usr/local/lib/hermes-agent/venv/bin/activate; exec hermes gateway run'",
     env: processEnv,
     keepAlive: true,
-    timeout: 60,
-    waitForPorts: [8443],
+    timeout: 0,
+  }).catch((err) => {
+    console.error("[blaxel] restartHermes exec failed:", err);
   });
 }
 

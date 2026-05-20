@@ -137,6 +137,14 @@ export async function POST(
       "X-Telegram-Bot-Api-Secret-Token": telegramConfig.webhook_secret ?? "",
     },
     body,
+  }).then((res) => {
+    if (!res.ok) {
+      console.error("[telegram/webhook] sandbox rejected forward", {
+        sandboxId,
+        status: res.status,
+        url: telegramConfig.webhook_url,
+      });
+    }
   }).catch((err) => {
     console.error("[telegram/webhook] forward failed", {
       sandboxId,
