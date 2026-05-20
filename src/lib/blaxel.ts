@@ -155,7 +155,6 @@ export async function restartHermes(sandboxName: string, env?: Record<string, st
     env: processEnv,
     keepAlive: true,
     timeout: 0,
-    waitForPorts: [8443],
   });
 }
 
