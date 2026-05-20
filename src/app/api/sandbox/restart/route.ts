@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { updateSandboxModel, restartHermes } from "@/lib/blaxel";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { updateSandboxModel, restartHermes, getPublicWebhookUrl } from "@/lib/blaxel";
 import { getModelForProduct } from "@/lib/plans";
 
 export async function POST() {
@@ -15,7 +16,7 @@ export async function POST() {
 
   const { data: sandbox } = await supabase
     .from("sandboxes")
-    .select("blaxel_sandbox_name")
+    .select("id, blaxel_sandbox_name")
     .eq("user_id", user.id)
     .eq("status", "running")
     .single();
@@ -35,6 +36,16 @@ export async function POST() {
 
   try {
     await updateSandboxModel(sandbox.blaxel_sandbox_name, model);
+
+    const freshUrl = await getPublicWebhookUrl(sandbox.blaxel_sandbox_name);
+    const webhookUrl = `${freshUrl}/telegram`;
+
+    const admin = createAdminClient();
+    await admin
+      .from("telegram_configs")
+      .update({ webhook_url: webhookUrl, updated_at: new Date().toISOString() })
+      .eq("sandbox_id", sandbox.id);
+
     await restartHermes(sandbox.blaxel_sandbox_name);
     return NextResponse.json({ success: true });
   } catch (error) {
