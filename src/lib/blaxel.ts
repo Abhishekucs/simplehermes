@@ -154,8 +154,7 @@ export async function restartHermes(sandboxName: string, env?: Record<string, st
     command: "bash -c 'set -a; . /opt/data/.env; set +a; source /usr/local/lib/hermes-agent/venv/bin/activate; exec hermes gateway run'",
     env: processEnv,
     keepAlive: true,
-    timeout: 60,
-    waitForPorts: [8443],
+    timeout: 0,
   });
 }
 
