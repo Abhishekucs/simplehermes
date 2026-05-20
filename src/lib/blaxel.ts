@@ -162,7 +162,12 @@ export async function restartHermes(sandboxName: string, env?: Record<string, st
 
 export async function getPublicWebhookUrl(sandboxName: string): Promise<string> {
   const sandbox = await SandboxInstance.get(sandboxName);
-  const preview = await sandbox.previews.createIfNotExists({
+  try {
+    await sandbox.previews.delete("telegram-webhook");
+  } catch {
+    // Preview may not exist yet
+  }
+  const preview = await sandbox.previews.create({
     metadata: { name: "telegram-webhook" },
     spec: { port: 8443, public: true },
   });
