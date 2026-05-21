@@ -41,7 +41,7 @@ export async function POST() {
     after(async () => {
       try {
         const freshUrl = await refreshPreviewWhenReady(sandbox.blaxel_sandbox_name);
-        const webhookUrl = `${freshUrl}/api/telegram/webhook/${sandbox.id}`;
+        const webhookUrl = `${freshUrl}/telegram`;
         const admin = createAdminClient();
         await admin
           .from("telegram_configs")

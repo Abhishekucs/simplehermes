@@ -4,7 +4,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { configureSandbox, startHermes, createPreview } from "@/lib/blaxel";
 import { getModelForProduct } from "@/lib/plans";
 import { encrypt } from "@/lib/encryption";
-import { randomBytes } from "crypto";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -48,8 +47,8 @@ export async function POST(request: Request) {
   const model = getModelForProduct(subscription?.product_id ?? null);
 
   try {
-    const webhookSecret = randomBytes(32).toString("hex");
-    const proxyWebhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/telegram/webhook/${sandbox.id}`;
+    const publicUrl = await createPreview(sandbox.blaxel_sandbox_name);
+    const webhookUrl = `${publicUrl}/telegram`;
 
     const envVars = {
       AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID!,
@@ -60,17 +59,13 @@ export async function POST(request: Request) {
       TELEGRAM_ALLOWED_USERS: telegramUserId,
       TELEGRAM_HOME_CHANNEL: telegramUserId,
       TELEGRAM_BOT_TOKEN: botToken,
-      TELEGRAM_WEBHOOK_URL: proxyWebhookUrl,
+      TELEGRAM_WEBHOOK_URL: webhookUrl,
       TELEGRAM_WEBHOOK_PORT: "8443",
-      TELEGRAM_WEBHOOK_SECRET: webhookSecret,
       HERMES_HOME: "/opt/data",
     };
 
     await configureSandbox(sandbox.blaxel_sandbox_name, envVars);
     await startHermes(sandbox.blaxel_sandbox_name, envVars);
-
-    const publicUrl = await createPreview(sandbox.blaxel_sandbox_name);
-    const sandboxTargetUrl = `${publicUrl}/api/telegram/webhook/${sandbox.id}`;
 
     const encryptedToken = encrypt(botToken);
 
@@ -81,8 +76,7 @@ export async function POST(request: Request) {
         bot_token_encrypted: encryptedToken,
         bot_username: botUsername,
         is_connected: true,
-        webhook_url: sandboxTargetUrl,
-        webhook_secret: webhookSecret,
+        webhook_url: webhookUrl,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" }
@@ -101,7 +95,7 @@ export async function POST(request: Request) {
       .update({ status: "running", updated_at: new Date().toISOString() })
       .eq("id", sandbox.id);
 
-    return NextResponse.json({ success: true, webhookUrl: proxyWebhookUrl });
+    return NextResponse.json({ success: true, webhookUrl });
   } catch (error) {
     console.error("[sandbox/configure]", error);
     return NextResponse.json(
