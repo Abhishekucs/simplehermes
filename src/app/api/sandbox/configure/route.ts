@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { configureSandbox, startHermes, getPublicWebhookUrl } from "@/lib/blaxel";
+import { configureSandbox, startHermes, createPreview } from "@/lib/blaxel";
 import { getModelForProduct } from "@/lib/plans";
 import { encrypt } from "@/lib/encryption";
 import { randomBytes } from "crypto";
@@ -49,8 +49,6 @@ export async function POST(request: Request) {
 
   try {
     const webhookSecret = randomBytes(32).toString("hex");
-    const publicUrl = await getPublicWebhookUrl(sandbox.blaxel_sandbox_name);
-    const sandboxTargetUrl = `${publicUrl}/telegram`;
     const proxyWebhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/telegram/webhook/${sandbox.id}`;
 
     const envVars = {
@@ -70,6 +68,9 @@ export async function POST(request: Request) {
 
     await configureSandbox(sandbox.blaxel_sandbox_name, envVars);
     await startHermes(sandbox.blaxel_sandbox_name, envVars);
+
+    const publicUrl = await createPreview(sandbox.blaxel_sandbox_name);
+    const sandboxTargetUrl = `${publicUrl}/telegram`;
 
     const encryptedToken = encrypt(botToken);
 
