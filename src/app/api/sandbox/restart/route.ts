@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { updateSandboxModel, restartHermes, getPublicWebhookUrl } from "@/lib/blaxel";
+import { updateSandboxModel, restartHermes, refreshPreviewWhenReady } from "@/lib/blaxel";
 import { getModelForProduct } from "@/lib/plans";
 
 export async function POST() {
@@ -36,17 +36,22 @@ export async function POST() {
 
   try {
     await updateSandboxModel(sandbox.blaxel_sandbox_name, model);
+    restartHermes(sandbox.blaxel_sandbox_name);
 
-    const freshUrl = await getPublicWebhookUrl(sandbox.blaxel_sandbox_name);
-    const webhookUrl = `${freshUrl}/telegram`;
+    after(async () => {
+      try {
+        const freshUrl = await refreshPreviewWhenReady(sandbox.blaxel_sandbox_name);
+        const webhookUrl = `${freshUrl}/telegram`;
+        const admin = createAdminClient();
+        await admin
+          .from("telegram_configs")
+          .update({ webhook_url: webhookUrl, updated_at: new Date().toISOString() })
+          .eq("sandbox_id", sandbox.id);
+      } catch (err) {
+        console.error("[sandbox/restart] background preview refresh failed:", err);
+      }
+    });
 
-    const admin = createAdminClient();
-    await admin
-      .from("telegram_configs")
-      .update({ webhook_url: webhookUrl, updated_at: new Date().toISOString() })
-      .eq("sandbox_id", sandbox.id);
-
-    await restartHermes(sandbox.blaxel_sandbox_name);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[sandbox/restart]", error);
