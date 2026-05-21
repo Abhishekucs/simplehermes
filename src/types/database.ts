@@ -61,12 +61,3 @@ export interface TelegramConfig {
   created_at: string;
   updated_at: string;
 }
-
-export interface MessageUsage {
-  id: string;
-  sandbox_id: string;
-  user_id: string;
-  telegram_update_id: number;
-  message_date: string;
-  created_at: string;
-}
