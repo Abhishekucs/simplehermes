@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { configureSandbox, startHermes, createPreview } from "@/lib/blaxel";
 import { getModelForProduct } from "@/lib/plans";
 import { encrypt } from "@/lib/encryption";
+import { randomBytes } from "crypto";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
   const model = getModelForProduct(subscription?.product_id ?? null);
 
   try {
+    const webhookSecret = randomBytes(32).toString("hex");
     const publicUrl = await createPreview(sandbox.blaxel_sandbox_name);
     const webhookUrl = `${publicUrl}/telegram`;
 
@@ -61,6 +63,7 @@ export async function POST(request: Request) {
       TELEGRAM_BOT_TOKEN: botToken,
       TELEGRAM_WEBHOOK_URL: webhookUrl,
       TELEGRAM_WEBHOOK_PORT: "8443",
+      TELEGRAM_WEBHOOK_SECRET: webhookSecret,
       HERMES_HOME: "/opt/data",
     };
 
