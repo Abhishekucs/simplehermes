@@ -17,11 +17,7 @@ export async function configureSandbox(
   const sandbox = await SandboxInstance.get(sandboxName);
 
   try {
-    await sandbox.process.exec({
-      name: "kill-hermes",
-      command: "pkill -f 'hermes gateway' || true",
-      waitForCompletion: true,
-    });
+    await sandbox.process.kill("hermes-main");
   } catch {
     // Process may not exist
   }
@@ -68,7 +64,7 @@ export async function startHermes(sandboxName: string, env?: Record<string, stri
     command: "bash -c 'set -a; . /opt/data/.env; set +a; source /usr/local/lib/hermes-agent/venv/bin/activate; exec hermes gateway run'",
     env: processEnv,
     keepAlive: true,
-    timeout: 60,
+    timeout: 0,
     waitForPorts: [8443],
   });
 }
