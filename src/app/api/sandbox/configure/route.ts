@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     await startHermes(sandbox.blaxel_sandbox_name, envVars);
 
     const publicUrl = await createPreview(sandbox.blaxel_sandbox_name);
-    const sandboxTargetUrl = `${publicUrl}/telegram`;
+    const sandboxTargetUrl = `${publicUrl}/api/telegram/webhook/${sandbox.id}`;
 
     const encryptedToken = encrypt(botToken);
 
